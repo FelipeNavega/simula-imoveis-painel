@@ -8,6 +8,7 @@ use App\Enums\UserTypeEnum;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Exception;
 
 class DatabaseSeeder extends Seeder
 {
@@ -17,30 +18,64 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Executa arquivo SQL de municípios e estados
-        $municipios_sql_path = database_path('municipios_estados_BR.sql');
-        DB::unprepared(file_get_contents($municipios_sql_path));
+        try {
+            $municipios_sql_path = database_path('municipios_estados_BR.sql');
+            if (file_exists($municipios_sql_path)) {
+                DB::unprepared(file_get_contents($municipios_sql_path));
+                $this->command->info('Arquivo municipios_estados_BR.sql executado com sucesso.');
+            } else {
+                $this->command->warn('Arquivo municipios_estados_BR.sql não encontrado.');
+            }
+        } catch (Exception $e) {
+            $this->command->error('Erro ao executar municipios_estados_BR.sql: ' . $e->getMessage());
+        }
 
         // Executa arquivo SQL para bancos
-        $banks_sql_path = database_path('banks.sql');
-        DB::unprepared(file_get_contents($banks_sql_path));
+        try {
+            $banks_sql_path = database_path('banks.sql');
+            if (file_exists($banks_sql_path)) {
+                DB::unprepared(file_get_contents($banks_sql_path));
+                $this->command->info('Arquivo banks.sql executado com sucesso.');
+            } else {
+                $this->command->warn('Arquivo banks.sql não encontrado.');
+            }
+        } catch (Exception $e) {
+            $this->command->error('Erro ao executar banks.sql: ' . $e->getMessage());
+        }
 
         // Executa arquivo SQL para formulários
-        $forms_sql_path = database_path('forms.sql');
-        DB::unprepared(file_get_contents($forms_sql_path));
+        try {
+            $forms_sql_path = database_path('forms.sql');
+            if (file_exists($forms_sql_path)) {
+                DB::unprepared(file_get_contents($forms_sql_path));
+                $this->command->info('Arquivo forms.sql executado com sucesso.');
+            } else {
+                $this->command->warn('Arquivo forms.sql não encontrado.');
+            }
+        } catch (Exception $e) {
+            $this->command->error('Erro ao executar forms.sql: ' . $e->getMessage());
+        }
 
-       User::create([
-           'name' => 'Admin',
-           'type' => UserTypeEnum::ADMIN,
-           'email' => 'admin@email.com.br',
-           'password' => 'VddE!-Dn@tJIaxl3Pse8'
-       ]);
+        // Cria usuários
+        try {
+            User::create([
+                'name' => 'Admin',
+                'type' => UserTypeEnum::ADMIN,
+                'email' => 'admin@email.com.br',
+                'password' => 'VddE!-Dn@tJIaxl3Pse8'
+            ]);
 
-        User::create([
-            'name' => 'Parceiro',
-            'partner_type' => PartnerTypeEnum::OUTROS,
-            'type' => UserTypeEnum::PARTNER,
-            'email' => 'partner@email.com.br',
-            'password' => 'VddE!-Dn@tJIaxl3Pse8'
-        ]);
+            User::create([
+                'name' => 'Parceiro',
+                'partner_type' => PartnerTypeEnum::OUTROS,
+                'type' => UserTypeEnum::PARTNER,
+                'email' => 'partner@email.com.br',
+                'password' => 'VddE!-Dn@tJIaxl3Pse8'
+            ]);
+
+            $this->command->info('Usuários criados com sucesso.');
+        } catch (Exception $e) {
+            $this->command->error('Erro ao criar usuários: ' . $e->getMessage());
+        }
     }
 }
